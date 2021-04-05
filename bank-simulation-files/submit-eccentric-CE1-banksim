@@ -1,0 +1,14 @@
+universe = vanilla
+executable = eccentric_CE1_banksim
+getenv = True
+request_memory =  20 Gb
+
+output = logs/job-CE1-eccen-banksim.$(cluster).$(process).out
+error = logs/job-CE1-eccen-banksim.$(cluster).$(process).err
+log =  logs/job-CE1-eccen-banksim.$(cluster).log
+
+stream_error = True
+stream_output = True
+accounting_group=aei.dev.cbc
+
+queue 1000
