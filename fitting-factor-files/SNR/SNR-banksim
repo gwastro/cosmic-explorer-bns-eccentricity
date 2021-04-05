@@ -1,0 +1,102 @@
+#!/usr/bin/env python
+
+# Import Modules
+import pycbc
+from pycbc.waveform import get_fd_waveform, get_td_waveform
+from pycbc.filter import match
+from pycbc.types import FrequencySeries
+from pycbc import distributions
+from pycbc.psd import aLIGOZeroDetHighPower
+from pycbc.filter import match, sigmasq
+import pycbc.conversions as conversions
+import h5py
+import numpy as np
+import matplotlib.pyplot as plt
+import argparse
+import sys, os
+
+# Set seed of random number generator
+np.random.seed(seed=None)
+
+# Set noise file location
+CE1_noise_file = '/work/amber.lenon/projects/eccen/3G-search-prospects/eccentric-search-prospects/banks/noise-files/CE1_strain.txt'
+
+# Set template bank file location
+CE1_template_bank_file = '/work/amber.lenon/projects/eccen/3G-search-prospects/eccentric-search-prospects/banks/fitting-factor/banks/CE1/no-eccen-small-7Hz-CE1-m1m2.txt'
+
+# Variables for waveform generation
+td_length = 2048 # seconds
+srate = 4096 # Hz
+N = int(td_length * srate)
+fd_length = int(N / 2 + 1)
+delta_t = 1.0 / srate
+delta_f = 1.0 / td_length
+f_low = 7.0 # Hz
+
+# Import the masses generated from the template bank
+template_bank = np.loadtxt(CE1_template_bank_file ,delimiter =',')
+bank_mass_1 = template_bank[:,0]
+bank_mass_2 = template_bank[:,1]
+
+# Import the PSD, Cosmic Explorer is an ASD file
+psd_ce1 = pycbc.psd.from_txt(CE1_noise_file,
+                             length=fd_length, delta_f=delta_f,
+                             low_freq_cutoff=f_low, is_asd_file=True)
+
+
+#Generate random m1, m2, and ecc value within given range
+#Masses from 1.0 to 3.0--BNS
+#ecc from 0 to 0.05
+injection_m1 = 1.4 
+injection_m2 = 1.4
+eccen_range = np.arange(0.0,0.0502,0.0002)
+
+for injection_ecc in eccen_range:
+    #Calculate a waveform with the generated masses
+    injection_waveform_plus, _ = get_fd_waveform(approximant = "TaylorF2Ecc", mass1 = injection_m1,
+                                              mass2 = injection_m2, delta_f = delta_f,
+                                              f_lower = f_low, eccentricity = injection_ecc)
+    #Calculate the tau0 of the injected waveform
+    injection_tau0 = conversions.tau0_from_mass1_mass2(injection_m1, injection_m2, f_lower=15)
+
+    #Reset the maximum match for this injection
+    max_match = 0
+
+    for tidx in range(len(bank_mass_1)):
+
+        template_m1 = bank_mass_1[tidx]
+        template_m2 = bank_mass_2[tidx]
+
+        #Calculate the tau0 of the template waveform
+        template_tau0 = conversions.tau0_from_mass1_mass2(template_m1, template_m2, f_lower=15)
+        
+        #Take absolute value of difference between the 2 tau0 values
+        delta_tau0 = np.abs(template_tau0-injection_tau0)
+
+        #Only enter if difference is less than 0.01
+        if delta_tau0 < 0.01:
+
+            #Calculate a waveform with template parameters
+            template_waveform_plus, __ = get_fd_waveform(approximant = "TaylorF2", mass1 = template_m1, 
+                                                         mass2 = template_m2, f_lower = f_low, delta_f = delta_f)
+
+            flen = min(len(injection_waveform_plus), len(template_waveform_plus), len(psd_ce1))
+            injection_waveform_plus.resize(flen)
+            template_waveform_plus.resize(flen)
+
+            # Calculate the match between the injection and template waveforms
+            match_ce1, _ = match(injection_waveform_plus, template_waveform_plus, 
+                                     psd = psd_ce1, low_frequency_cutoff = f_low)
+
+            #If the match for this template exceeds the stored max, update the max
+            if match_ce1 > max_match: 
+                max_match = match_ce1
+                max_match_template_m1 = template_m1
+                max_match_template_m2 = template_m2
+
+    #Print out the maximum match across the template bank for this injection
+    print injection_m1, injection_m2, injection_ecc, max_match_template_m1, max_match_template_m2, max_match
+    
+    # Write everything in the buffer to the standard out file
+    sys.stdout.flush()
+        
