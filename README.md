@@ -47,7 +47,7 @@ The notebook server can be started inside the container with the command:
 ```sh
 jupyter notebook --ip 0.0.0.0 --no-browser
 ```
-You can then connect to the notebook server at the URL printed by ``jupyter``. Navigate to the directory `cosmic-explorer-bns-eccentricity` in the cloned git repository and open [data_release.ipynb](https://github.com/gwastro/cosmic-explorer-bns-eccentricity/blob/master/data-release.ipynb), the notebook that demonstartes use of these results.
+You can then connect to the notebook server at the URL printed by ``jupyter``. Navigate to the directory `cosmic-explorer-bns-eccentricity` in the cloned git repository and open [data-release.ipynb](https://github.com/gwastro/cosmic-explorer-bns-eccentricity/blob/master/data-release.ipynb), the notebook that demonstartes use of these results.
 
 ## Acknowledgments ##
 
