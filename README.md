@@ -20,15 +20,20 @@ This notebook is a companion to Lenon, Brown and Nitz (2021) posted at [arXiv:21
 We encourage use of these data in derivative works. If you use the material provided here, please cite the paper using the reference:
 
 ```
-@article{,
-      author         = "Lenon, Amber K. and Brown, Duncan A. and Nitz, Alexander H.",
-      title          = "{Eccentric Binary Neutron Star Search Prospects for Cosmic Explorer}",
-      year           = "2021",
-      eprint         = "2103.14088",
-      archivePrefix  = "arXiv",
-      primaryClass   = "astro-ph.HE",
-      SLACcitation   = "%%CITATION = ARXIV:2103.14088;%%"
+@article{Lenon:2021zac,
+    author = "Lenon, Amber K. and Brown, Duncan A. and Nitz, Alexander H.",
+    title = "{Eccentric binary neutron star search prospects for Cosmic Explorer}",
+    eprint = "2103.14088",
+    archivePrefix = "arXiv",
+    primaryClass = "astro-ph.HE",
+    doi = "10.1103/PhysRevD.104.063011",
+    journal = "Phys. Rev. D",
+    volume = "104",
+    number = "6",
+    pages = "063011",
+    year = "2021"
 }
+
 ```
 
 ## Running this notebook in a Docker container ##
